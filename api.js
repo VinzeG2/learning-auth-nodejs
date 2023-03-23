@@ -3,7 +3,7 @@ const express = require('express')
 const spell = require('./spells.controller')
 const mongoose = require('mongoose')
 
-mongoose.connect(`mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@cluster0.klxnqmt.mongodb.net/spellsproject?retryWrites=true&w=majority`)
+mongoose.connect(`mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@cluster0.klxnqmt.mongodb.net/spellsproject?retryWrites=true&w=majority`)
 const app = express();
 app.use(express.json())
 

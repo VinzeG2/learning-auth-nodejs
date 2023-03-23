@@ -1,5 +1,6 @@
 const UserModel = require("./User")
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 
 const Auth = {
@@ -12,7 +13,7 @@ const Auth = {
             } else {
                 const isMatch = await bcrypt.compare(body.password, user.password)
                 if (isMatch) {
-                    const signed = jsonwt
+                    const signed = jwt.sign({ _id }, process.env.SECRET)
                 }
             }
         } catch (error) {
