@@ -58,8 +58,68 @@ const addFormListener = () => {
     }
 }
 
-window.onload = () => {
+const loadSpellsForm = () => {
     loadInitialTemplate()
     addFormListener()
     getSpells()
+}
+
+const checkLoggedIn = () => localStorage.getItem('jwt')
+
+
+const loadLoginTemplate = () => {
+    const template = `
+        <h1>Login<h1>
+        <form id="login-form">
+            <div>
+                <label> username </label>
+                <input name="username" />
+            </div>
+            <div>
+                <label> Password </label>
+                <input name="password" />
+            </div>
+            <button type="submit"> Submit </button>
+        </form>
+        <div id="error"></div>
+    `
+    const body = document.getElementsByTagName('body')[0]
+    body.innerHTML = template
+}
+
+const addLoginListener = () => {
+    const loginForm = document.getElementById('login-form')
+    loginForm.onsubmit = async (e) => {
+        e.preventDefault()
+        const formData = new FormData(loginForm)
+        const data = Object.fromEntries(formData.entries())
+        const response = await fetch('/login', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        const responseData = await response.text()
+        if (response.status >= 300) {
+            const errorNode = document.getElementById('error')
+            errorNode.innerHTML = responseData
+        } else {
+            console.log(responseData);
+        }
+    }
+}
+
+const loadLoginForm = () => {
+    loadLoginTemplate()
+    addLoginListener()
+}
+
+window.onload = () => {
+    const loggedIn = checkLoggedIn()
+    if (loggedIn) {
+        loadSpellsForm()
+    } else {
+        loadLoginForm()
+    }
 }
