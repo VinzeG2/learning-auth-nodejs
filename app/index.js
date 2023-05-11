@@ -19,7 +19,12 @@ const loadInitialTemplate = () => {
 }
 
 const getSpells = async () => {
-    const result = await fetch('/spells')
+    const result = await fetch('/spells',
+    {
+        headers: {
+            Authorization: localStorage.getItem('jwt')
+        }
+    })
     const spells = await result.json();
     const template = (spell) => `<li> ${spell.name} ${spell.type} <button data-id="${spell._id}"> ELIMINAR </button> </li>`
     const spellsList = document.getElementById('spells-list')
@@ -32,6 +37,9 @@ const getSpells = async () => {
             alert("REMOVED")
             await fetch(`/spells/${spell._id}`, {
                 method: 'DELETE',
+                headers: {
+                    Authorization: localStorage.getItem('jwt')
+                }
             })
             
         }
@@ -51,6 +59,7 @@ const addFormListener = () => {
             body: JSON.stringify(data),
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('jwt')
             }
         })
         spellForm.reset()
@@ -82,6 +91,7 @@ const loadLoginTemplate = () => {
             <button type="submit"> Submit </button>
         </form>
         <div id="error"></div>
+        <a href="#" id="gotoregister">Registrarse</a>
     `
     const body = document.getElementsByTagName('body')[0]
     body.innerHTML = template
@@ -105,14 +115,84 @@ const addLoginListener = () => {
             const errorNode = document.getElementById('error')
             errorNode.innerHTML = responseData
         } else {
-            console.log(responseData);
+            localStorage.setItem('jwt', `Bearer ${responseData}`)
+            loadSpellsForm()
         }
     }
+}
+
+const loadRegisterTemplate = () => {
+    const template = `
+        <h1>Register<h1>
+        <form id="register-form">
+            <div>
+                <label> username </label>
+                <input name="username" />
+            </div>
+            <div>
+                <label> Password </label>
+                <input name="password" />
+            </div>
+            <button type="submit"> Submit </button>
+        </form>
+        <div id="error"></div>
+        <a href="#" id="gotologin">Already have an account</a>
+    `
+    const body = document.getElementsByTagName('body')[0]
+    body.innerHTML = template
+}
+const addRegisterListener = () => {
+    const registerForm = document.getElementById('register-form')
+    registerForm.onsubmit = async (e) => {
+        e.preventDefault()
+        const formData = new FormData(registerForm)
+        const data = Object.fromEntries(formData.entries())
+        const response = await fetch('/register', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        const responseData = await response.text()
+        if (response.status >= 300) {
+            const errorNode = document.getElementById('error')
+            errorNode.innerHTML = responseData
+        } else {
+            localStorage.setItem('jwt', `Bearer ${responseData}`)
+            loadSpellsForm()
+        }
+    }
+}
+const gotoLoginListener = () => {
+    const gotoLogin = document.getElementById('gotologin')
+    gotoLogin.onclick = (e) => {
+        e.preventDefault()
+        console.log("Login Page");
+        loadLoginForm()
+    }
+}
+
+const registerPage = () => {
+    loadRegisterTemplate()
+    addRegisterListener()
+    gotoLoginListener()
+}
+
+const gotoRegisterListener = () => {
+    const gotoRegister = document.getElementById('gotoregister')
+    gotoRegister.onclick = (e) => {
+        e.preventDefault()
+        console.log("Register Page");
+        registerPage()
+    }
+
 }
 
 const loadLoginForm = () => {
     loadLoginTemplate()
     addLoginListener()
+    gotoRegisterListener()
 }
 
 window.onload = () => {
